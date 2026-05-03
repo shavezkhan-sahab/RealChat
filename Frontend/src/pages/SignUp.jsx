@@ -1,113 +1,117 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-
 import axios from "axios";
 import { useDispatch } from "react-redux";
 import { setUserData } from "../redux/userSlice";
-import { useSelector } from "react-redux";
+import { LuEye, LuEyeOff } from "react-icons/lu";
+
 function SignUp() {
-  let navigate = useNavigate();
-  let [show, setShow] = useState(false);
-  let [userName, setUserName] = useState();
-  let [email, setEmail] = useState();
-  let [password, setPassword] = useState();
-  let [loading, setLoading] = useState(false);
-  let [err, setErr] = useState("");
-  let dispatch = useDispatch();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const [userName, setUserName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [show, setShow] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState("");
 
   const handleSignUp = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setErr("");
     try {
-      let result = await axios.post(
+      const result = await axios.post(
         "http://localhost:8000/api/auth/signup",
-        {
-          userName,
-          email,
-          password,
-        },
-        { withCredentials: true },
+        { userName, email, password },
+        { withCredentials: true }
       );
       dispatch(setUserData(result.data));
-      setEmail("");
-      setPassword("");
-      setLoading(false);
-      setErr(" ");
     } catch (error) {
-      console.log(error);
+      setErr(error?.response?.data?.message || "Sign up failed");
+    } finally {
       setLoading(false);
-      setErr(error?.response?.data?.message);
     }
   };
+
   return (
-    <div className="w-full h-[100vh] bg-slate-400 flex items-center justify-center">
-      <div
-        className=" w-full max-w-[500px] h-[600px] bg-white 
-    rounded-lg shadow-gray-400 shadow-lg flex flex-col gap-[30px]"
-      >
-        <div
-          className="w-full h-[200px] bg-[#20c7ff] rounded-b-[30%] shadow-gray-400 shadow-lg 
-        flex justify-center items-center "
-        >
-          <h1 className="text-gray-500 font-bold tex-[30px] ">
-            Welcome to <span className="text-white"> Chatly</span>
-          </h1>
+    <div className="w-full bg-[#f0f4f8] flex items-center justify-center px-4"
+      style={{ minHeight: "calc(var(--vh, 1dvh) * 100)" }}>
+      <div className="w-full max-w-[420px] bg-white rounded-3xl shadow-xl overflow-hidden">
+
+        {/* Blue curved header */}
+        <div className="bg-[#20c7ff] px-8 pt-10 pb-14 rounded-b-[50%] flex flex-col items-center gap-1 shadow-md">
+          <h1 className="text-white font-bold text-3xl tracking-wide">chatly</h1>
+          <p className="text-white/80 text-sm">Create your account</p>
         </div>
-        <form
-          className=" w-full flex flex-col gap-[20px] items-center"
-          onSubmit={handleSignUp}
-        >
+
+        {/* Form */}
+        <form className="px-8 pt-8 pb-8 flex flex-col gap-4 -mt-4" onSubmit={handleSignUp}>
           <input
             type="text"
-            placeholder=" username"
-            className="w-[90%] h-[60px]
-          outline-none border-2 border-[#20c7ff] px-[20px] py-[10px] bg-[white]
-          rounded-lg shadow-gray-200 shadow-lg"
-            onChange={(e) => setUserName(e.target.value)}
+            placeholder="Username"
             value={userName}
-          ></input>
+            onChange={(e) => setUserName(e.target.value)}
+            required
+            className="w-full h-[52px] px-5 rounded-2xl border-2 border-[#20c7ff]/30 outline-none
+                       text-sm focus:border-[#20c7ff] transition bg-slate-50"
+          />
+
           <input
             type="email"
-            placeholder=" email"
-            className="w-[90%] h-[60px]
-          outline-none border-2 border-[#20c7ff] px-[20px] py-[10px] bg-[white]
-          rounded-lg shadow-gray-200 shadow-lg"
-            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Email address"
             value={email}
-          ></input>
-          <div
-            className="w-[90%] h-[50px]  border-2 border-[#20c7ff] 
-           rounded-lg shadow-gray-200 shadow-lg overflow-hidden  relative"
-          >
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            className="w-full h-[52px] px-5 rounded-2xl border-2 border-[#20c7ff]/30 outline-none
+                       text-sm focus:border-[#20c7ff] transition bg-slate-50"
+          />
+
+          <div className="relative">
             <input
               type={show ? "text" : "password"}
-              placeholder="password"
-              className="
-          outline-none px-[20px] py-[10px] bg-[white]
-          "
-              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Password (min 6 characters)"
               value={password}
-            ></input>
-            <span
-              className="absolute top-[10px] right-[20px] text-[#20c7ff] text-[19px] font-semibold
-              "
-              onClick={() => setShow((prev) => !prev)}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className="w-full h-[52px] px-5 pr-12 rounded-2xl border-2 border-[#20c7ff]/30 outline-none
+                         text-sm focus:border-[#20c7ff] transition bg-slate-50"
+            />
+            <button
+              type="button"
+              onClick={() => setShow((p) => !p)}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#20c7ff] transition"
             >
-              {`${show ? "hidden" : "show"}`}
-            </span>
+              {show ? <LuEyeOff className="w-5 h-5" /> : <LuEye className="w-5 h-5" />}
+            </button>
           </div>
-          {err && <p className="text-red-500">{err}</p>}
+
+          {err && (
+            <p className="text-red-500 text-sm text-center bg-red-50 py-2 rounded-xl">{err}</p>
+          )}
+
           <button
-            className="px-[20px] py-[10px] bg-[#20c7ff] rounded-2xl
-           shadow-gray-200px shadow-lg text-[20px] w-[200px] mt-[20px] font-semibold
-          hover:shadow-inner"
+            type="submit"
+            disabled={loading}
+            className="w-full h-[52px] bg-[#20c7ff] text-white font-semibold text-base rounded-2xl
+                       hover:bg-[#1ab3e8] active:scale-[0.98] transition-all disabled:opacity-60 mt-2 shadow-md"
           >
-            {loading ? "Loading..." : "Sign up"}
+            {loading ? (
+              <span className="flex items-center justify-center gap-2">
+                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                Creating account...
+              </span>
+            ) : "Sign Up"}
           </button>
-          <p className="cursor-pointer" onClick={() => navigate("/login")}>
-            {" "}
-            Already have an account ?{" "}
-            <span className="text-[#20c7ff]">login</span>
+
+          <p className="text-center text-sm text-gray-500 mt-1">
+            Already have an account?{" "}
+            <span
+              className="text-[#20c7ff] font-semibold cursor-pointer hover:underline"
+              onClick={() => navigate("/login")}
+            >
+              Login
+            </span>
           </p>
         </form>
       </div>

@@ -1,1 +1,37 @@
 @import "tailwindcss";
+
+/*
+  --vh fix: mobile browsers (Chrome, Safari, Samsung) report 100vh including
+  the browser toolbar. We set --vh via JS to the real visible height.
+  Falls back to 1dvh which works in modern browsers natively.
+*/
+:root {
+  --vh: 1dvh;
+}
+
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+  /* prevent pull-to-refresh interfering with chat scroll */
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+  height: calc(var(--vh, 1dvh) * 100);
+  overflow: hidden;
+}
+
+/* Prevent iOS Safari from zooming on input focus */
+input,
+textarea,
+select {
+  font-size: 16px;
+}
+
+/* Safe area padding for iPhone notch / home indicator */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}

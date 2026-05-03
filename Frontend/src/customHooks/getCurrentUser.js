@@ -1,21 +1,24 @@
 import axios from "axios";
 import { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
+import { setUserData } from "../redux/userSlice";
 
 const getCurrentUser = () => {
-  let dispatch = useDispatch();
-  let { userData } = useSelector((state) => state.user);
+  const dispatch = useDispatch();
+
   useEffect(() => {
-    const fetchUser = async () => {
+    const fetch = async () => {
       try {
-        let result = await axios.get("http://localhost:8000/api/user/current", {
+        const res = await axios.get("http://localhost:8000/api/user/current", {
           withCredentials: true,
         });
-      } catch (error) {
-        console.log(error);
+        dispatch(setUserData(res.data));
+      } catch {
+        dispatch(setUserData(null));
       }
     };
-  }, [userData]);
+    fetch();
+  }, []); // run once on mount — checks cookie session
 };
 
 export default getCurrentUser;

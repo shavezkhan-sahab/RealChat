@@ -1,55 +1,123 @@
-import img from "../assets/img.jpg";
-import { FaCamera } from "react-icons/fa";
-import { useSelector } from "react-redux";
+import { useRef, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { IoArrowBackSharp } from "react-icons/io5";
+import axios from "axios";
+import { IoArrowBack } from "react-icons/io5";
+import { FaCamera } from "react-icons/fa";
+import { setUserData } from "../redux/userSlice";
+import dp from "../assets/img.jpg";
 
 function Profile() {
   const { userData } = useSelector((state) => state.user);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  const [frontendImage, setFrontendImage] = useState(userData?.image || dp);
+  const [backendImage, setBackendImage] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const imageRef = useRef();
+
+  const handleImage = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setFrontendImage(URL.createObjectURL(file));
+      setBackendImage(file);
+    }
+  };
+
+  const handleSave = async (e) => {
+    e.preventDefault();
+    if (!backendImage) return;
+    setSaving(true);
+    setSuccess(false);
+    try {
+      const formData = new FormData();
+      formData.append("image", backendImage);
+      // Do NOT set Content-Type manually — axios must set it with the correct boundary
+      const result = await axios.put(
+        "http://localhost:8000/api/user/profile",
+        formData,
+        { withCredentials: true }
+      );
+      dispatch(setUserData(result.data));
+      setSuccess(true);
+      setBackendImage(null);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
-    <div className="w-full h-[100vh] bg-slate-400 justify-center gap-[20px] items-center flex flex-col relative">
-      {/* Back button */}
-      <div className="fixed top-[20px] left-[20px] cursor-pointer">
-        <IoArrowBackSharp
-          className="w-[30px] h-[30px] text-white hover:text-[#20c7ff] transition-colors"
+    <div className="w-full bg-[#f0f4f8] flex flex-col items-center overflow-y-auto"
+      style={{ minHeight: "calc(var(--vh, 1dvh) * 100)" }}>
+
+      {/* Header */}
+      <div className="w-full bg-[#20c7ff] px-5 pt-5 pb-16 rounded-b-[40px] shadow-lg flex items-center gap-3">
+        <button
           onClick={() => navigate("/")}
-        />
+          className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition"
+        >
+          <IoArrowBack className="w-5 h-5 text-white" />
+        </button>
+        <h1 className="text-white font-bold text-xl">My Profile</h1>
       </div>
 
-      {/* Profile picture */}
-      <div className="bg-white border-2 rounded-full relative border-[#20c7ff] shadow-gray-400 shadow-lg">
-        <div className="w-[200px] h-[200px] rounded-full overflow-hidden">
-          <img src={img} alt="Profile" className="w-full h-full object-cover" />
+      {/* Avatar — overlaps header */}
+      <div className="relative -mt-14 mb-4">
+        <div
+          className="w-[110px] h-[110px] rounded-full overflow-hidden border-4 border-white shadow-xl cursor-pointer"
+          onClick={() => imageRef.current.click()}
+        >
+          <img src={frontendImage} alt="avatar" className="w-full h-full object-cover" />
         </div>
-        <FaCamera className="absolute bottom-8 right-5 w-[28px] h-[28px] cursor-pointer text-[#20c7ff]" />
+        <div
+          className="absolute bottom-1 right-1 w-8 h-8 bg-[#20c7ff] rounded-full flex items-center justify-center shadow cursor-pointer border-2 border-white"
+          onClick={() => imageRef.current.click()}
+        >
+          <FaCamera className="w-3.5 h-3.5 text-white" />
+        </div>
+        <input ref={imageRef} type="file" accept="image/*" hidden onChange={handleImage} />
       </div>
 
-      {/* Profile form */}
-      <form className="w-[95%] max-w-[500px] flex flex-col gap-[20px] items-center justify-center">
-        <input
-          type="text"
-          placeholder="Enter your name"
-          className="w-[90%] h-[60px] outline-none border-2 border-[#20c7ff] px-[20px] py-[10px] bg-[white] rounded-lg shadow-gray-200 shadow-lg"
-        />
-        <input
-          type="text"
-          readOnly
-          className="w-[90%] h-[60px] outline-none border-2 border-[#20c7ff] px-[20px] py-[10px] bg-gray-100 rounded-lg shadow-gray-200 shadow-lg"
-          value={userData?.userName || ""}
-        />
-        <input
-          type="email" // Fixed: eamil -> email
-          readOnly
-          className="w-[90%] h-[60px] outline-none border-2 border-[#20c7ff] px-[20px] py-[10px] bg-gray-100 rounded-lg shadow-gray-200 shadow-lg text-gray-600"
-          value={userData?.email || ""}
-        />
+      {/* Info card */}
+      <form
+        onSubmit={handleSave}
+        className="w-full max-w-[420px] px-5 flex flex-col gap-4"
+      >
+        {/* Read-only fields */}
+        <div className="bg-white rounded-2xl shadow-sm px-5 py-4 flex flex-col gap-3">
+          <div>
+            <p className="text-xs text-gray-400 mb-1">Username</p>
+            <p className="text-sm font-semibold text-gray-700">{userData?.userName}</p>
+          </div>
+          <div className="h-px bg-gray-100" />
+          <div>
+            <p className="text-xs text-gray-400 mb-1">Email</p>
+            <p className="text-sm font-semibold text-gray-700">{userData?.email}</p>
+          </div>
+        </div>
+
+        {success && (
+          <p className="text-green-500 text-sm text-center bg-green-50 py-2 rounded-xl">
+            Profile photo updated ✓
+          </p>
+        )}
+
         <button
           type="submit"
-          className="px-[20px] py-[10px] bg-[#20c7ff] rounded-2xl shadow-gray-200 shadow-lg text-[20px] w-[200px] mt-[20px] font-semibold hover:shadow-inner text-white"
+          disabled={!backendImage || saving}
+          className="w-full h-[52px] bg-[#20c7ff] text-white font-semibold rounded-2xl
+                     hover:bg-[#1ab3e8] active:scale-[0.98] transition-all disabled:opacity-40 shadow-md"
         >
-          Save Profile
+          {saving ? (
+            <span className="flex items-center justify-center gap-2">
+              <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              Saving...
+            </span>
+          ) : "Save Photo"}
         </button>
       </form>
     </div>

@@ -5,10 +5,15 @@ import getCurrentUser from "./customHooks/getCurrentUser";
 import { useSelector } from "react-redux";
 import Home from "./pages/Home";
 import Profile from "./pages/Profile";
+import getOtherUsers from "./customHooks/getOtherUsers";
+import useSocket from "./customHooks/useSocket";
+import useChatList from "./customHooks/useChatList";
 
 export default function App() {
   getCurrentUser();
-
+  getOtherUsers();
+  useSocket();
+  useChatList();
   let { userData } = useSelector((state) => state.user);
   return (
     <Routes>
