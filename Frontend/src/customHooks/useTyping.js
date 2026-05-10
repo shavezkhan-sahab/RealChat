@@ -1,7 +1,7 @@
 import { useCallback, useRef } from "react";
 import { getSocket } from "../socket/socket.js";
 
-const TYPING_DEBOUNCE_MS = 500;  // emit "typing" at most once per 500ms
+const TYPING_DEBOUNCE_MS = 500; // emit "typing" at most once per 500ms
 const STOP_TYPING_DELAY_MS = 1500; // emit "stopTyping" 1.5s after last keystroke
 
 /**
@@ -16,9 +16,9 @@ const STOP_TYPING_DELAY_MS = 1500; // emit "stopTyping" 1.5s after last keystrok
  * and always receives a "stopTyping" 1.5 s after the user pauses.
  */
 const useTyping = (receiverId) => {
-  const stopTypingTimer = useRef(null);   // auto-stop after idle
-  const debounceTimer = useRef(null);     // suppress rapid "typing" emits
-  const isTyping = useRef(false);         // track current emit state
+  const stopTypingTimer = useRef(null); // auto-stop after idle
+  const debounceTimer = useRef(null); // suppress rapid "typing" emits
+  const isTyping = useRef(false); // track current emit state
 
   const onTyping = useCallback(() => {
     const socket = getSocket();

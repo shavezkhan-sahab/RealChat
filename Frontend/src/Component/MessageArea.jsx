@@ -3,9 +3,15 @@ import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import { IoArrowBack } from "react-icons/io5";
 import { LuSend } from "react-icons/lu";
-import { MdOutlineAddPhotoAlternate } from "react-icons/md"; import { RxCross2 } from "react-icons/rx";
+import { MdOutlineAddPhotoAlternate } from "react-icons/md";
+import { RxCross2 } from "react-icons/rx";
 import { getSocket } from "../socket/socket.js";
-import { setMessages, addMessage, clearUnread, setSelectedUser } from "../redux/messageSlice.js";
+import {
+  setMessages,
+  addMessage,
+  clearUnread,
+  setSelectedUser,
+} from "../redux/messageSlice.js";
 import useTyping from "../customHooks/useTyping.js";
 import dp from "../assets/img.jpg";
 
@@ -13,7 +19,10 @@ import dp from "../assets/img.jpg";
 
 const formatMsgTime = (iso) => {
   if (!iso) return "";
-  return new Date(iso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  return new Date(iso).toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 };
 
 const formatDateLabel = (iso) => {
@@ -22,7 +31,11 @@ const formatDateLabel = (iso) => {
   const diffDays = Math.floor((new Date() - date) / 86400000);
   if (diffDays === 0) return "Today";
   if (diffDays === 1) return "Yesterday";
-  return date.toLocaleDateString([], { weekday: "long", day: "numeric", month: "long" });
+  return date.toLocaleDateString([], {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  });
 };
 
 const dayKey = (iso) => (iso ? new Date(iso).toDateString() : "");
@@ -31,23 +44,29 @@ const dayKey = (iso) => (iso ? new Date(iso).toDateString() : "");
 
 const StatusIcon = ({ status, isMine }) => {
   if (!isMine) return null;
-  if (status === "seen") return <span className="text-[10px] text-blue-400 ml-1">✓✓</span>;
-  if (status === "delivered") return <span className="text-[10px] text-gray-400 ml-1">✓✓</span>;
+  if (status === "seen")
+    return <span className="text-[10px] text-blue-400 ml-1">✓✓</span>;
+  if (status === "delivered")
+    return <span className="text-[10px] text-gray-400 ml-1">✓✓</span>;
   return <span className="text-[10px] text-gray-300 ml-1">✓</span>;
 };
 
 const DateSeparator = ({ label }) => (
   <div className="flex items-center gap-3 my-4">
     <div className="flex-1 h-px bg-gray-200" />
-    <span className="text-[11px] text-gray-400 font-medium px-2 bg-transparent whitespace-nowrap">{label}</span>
+    <span className="text-[11px] text-gray-400 font-medium px-2 bg-transparent whitespace-nowrap">
+      {label}
+    </span>
     <div className="flex-1 h-px bg-gray-200" />
   </div>
 );
 
 // Welcome screen shown on desktop when no chat is selected
 const WelcomeScreen = () => (
-  <div className="hidden lg:flex w-full h-full flex-col items-center justify-center gap-3"
-    style={{ background: "#f0f4f8" }}>
+  <div
+    className="hidden lg:flex w-full h-full flex-col items-center justify-center gap-3"
+    style={{ background: "#f0f4f8" }}
+  >
     <h2 className="text-gray-700 font-bold text-4xl">Welcome to Chatly</h2>
     <p className="text-gray-400 text-lg">Chat Friendly !</p>
   </div>
@@ -57,12 +76,14 @@ const WelcomeScreen = () => (
 
 function MessageArea() {
   const dispatch = useDispatch();
-  const { selectedUser, messages, typingUser, onlineUsers } = useSelector((state) => state.message);
+  const { selectedUser, messages, typingUser, onlineUsers } = useSelector(
+    (state) => state.message,
+  );
   const { userData } = useSelector((state) => state.user);
 
   const [text, setText] = useState("");
   const [imagePreview, setImagePreview] = useState(null); // local preview URL
-  const [imageFile, setImageFile] = useState(null);       // File object
+  const [imageFile, setImageFile] = useState(null); // File object
   const [sending, setSending] = useState(false);
 
   const bottomRef = useRef(null);
@@ -70,17 +91,20 @@ function MessageArea() {
   const fileRef = useRef(null);
   const { onTyping, stopTyping } = useTyping(selectedUser?._id);
 
+  const url =
+    "https://realchat-1-8fm2.onrender.com/" || "http://localhost:8000/";
   // ── Fetch history ──────────────────────────────────────────────────────────
   useEffect(() => {
     if (!selectedUser?._id) return;
     const fetch = async () => {
       try {
-        const res = await axios.get(
-          `http://localhost:8000/api/messages/${selectedUser._id}`,
-          { withCredentials: true }
-        );
+        const res = await axios.get(`${url}api/messages/${selectedUser._id}`, {
+          withCredentials: true,
+        });
         dispatch(setMessages(res.data));
-      } catch (err) { console.error(err); }
+      } catch (err) {
+        console.error(err);
+      }
     };
     fetch();
     const socket = getSocket();
@@ -130,10 +154,14 @@ function MessageArea() {
         const form = new FormData();
         form.append("image", imageFile);
         form.append("receiverId", selectedUser._id);
-        const res = await axios.post("http://localhost:8000/api/messages/image", form, {
-          withCredentials: true,
-          headers: { "Content-Type": "multipart/form-data" },
-        });
+        const res = await axios.post(
+          "http://localhost:8000/api/messages/image",
+          form,
+          {
+            withCredentials: true,
+            headers: { "Content-Type": "multipart/form-data" },
+          },
+        );
         // Server returns the saved doc — add directly (no optimistic needed)
         dispatch(addMessage(res.data));
         clearImage();
@@ -141,16 +169,21 @@ function MessageArea() {
 
       if (trimmed && socket) {
         // Add optimistic message immediately (no _id yet)
-        dispatch(addMessage({
-          sender: userData._id,
-          receiver: selectedUser._id,
-          message: trimmed,
-          status: "sent",
-          createdAt: new Date().toISOString(),
-          // no _id — replaceOptimisticMessage will swap this when ack arrives
-        }));
+        dispatch(
+          addMessage({
+            sender: userData._id,
+            receiver: selectedUser._id,
+            message: trimmed,
+            status: "sent",
+            createdAt: new Date().toISOString(),
+            // no _id — replaceOptimisticMessage will swap this when ack arrives
+          }),
+        );
         // Emit to server — server saves, acks back via "messageSent"
-        socket.emit("sendMessage", { receiverId: selectedUser._id, message: trimmed });
+        socket.emit("sendMessage", {
+          receiverId: selectedUser._id,
+          message: trimmed,
+        });
         setText("");
       }
     } catch (err) {
@@ -162,7 +195,10 @@ function MessageArea() {
   };
 
   const handleKeyDown = (e) => {
-    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(e); }
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSend(e);
+    }
   };
 
   if (!selectedUser) return <WelcomeScreen />;
@@ -172,7 +208,6 @@ function MessageArea() {
 
   return (
     <div className="flex flex-col w-full h-full bg-[#f0f4f8]">
-
       {/* ── Header ── */}
       <div className="flex items-center gap-3 px-4 py-3 bg-[#20c7ff] shadow-md shrink-0">
         <button
@@ -184,7 +219,11 @@ function MessageArea() {
 
         <div className="relative shrink-0">
           <div className="w-[42px] h-[42px] rounded-full overflow-hidden border-2 border-white/60">
-            <img src={selectedUser.image || dp} alt={selectedUser.userName} className="w-full h-full object-cover" />
+            <img
+              src={selectedUser.image || dp}
+              alt={selectedUser.userName}
+              className="w-full h-full object-cover"
+            />
           </div>
           {isOnline && (
             <span className="absolute bottom-0 right-0 w-[11px] h-[11px] bg-green-400 border-2 border-[#20c7ff] rounded-full" />
@@ -192,13 +231,20 @@ function MessageArea() {
         </div>
 
         <div className="flex flex-col min-w-0">
-          <span className="text-white font-semibold text-base leading-tight truncate">{selectedUser.userName}</span>
-          {typingUser
-            ? <span className="text-white/80 text-xs animate-pulse">typing...</span>
-            : <span className={`text-xs ${isOnline ? "text-green-100" : "text-white/60"}`}>
+          <span className="text-white font-semibold text-base leading-tight truncate">
+            {selectedUser.userName}
+          </span>
+          {typingUser ? (
+            <span className="text-white/80 text-xs animate-pulse">
+              typing...
+            </span>
+          ) : (
+            <span
+              className={`text-xs ${isOnline ? "text-green-100" : "text-white/60"}`}
+            >
               {isOnline ? "Online" : "Offline"}
             </span>
-          }
+          )}
         </div>
       </div>
 
@@ -211,7 +257,8 @@ function MessageArea() {
         )}
 
         {messages.map((msg, i) => {
-          const isMine = msg.sender === userData._id || msg.sender?._id === userData._id;
+          const isMine =
+            msg.sender === userData._id || msg.sender?._id === userData._id;
           const curDayKey = dayKey(msg.createdAt);
           const showSep = curDayKey !== lastDayKeyVal;
           if (showSep) lastDayKeyVal = curDayKey;
@@ -224,10 +271,13 @@ function MessageArea() {
 
           return (
             <div key={msg._id || i}>
-              {showSep && <DateSeparator label={formatDateLabel(msg.createdAt)} />}
+              {showSep && (
+                <DateSeparator label={formatDateLabel(msg.createdAt)} />
+              )}
 
-              <div className={`flex items-end gap-2 mb-1 ${isMine ? "justify-end" : "justify-start"}`}>
-
+              <div
+                className={`flex items-end gap-2 mb-1 ${isMine ? "justify-end" : "justify-start"}`}
+              >
                 {/* Receiver avatar — left side, only on last bubble in block */}
                 {!isMine && (
                   <div className="w-7 h-7 shrink-0 mb-0.5">
@@ -244,15 +294,18 @@ function MessageArea() {
                 )}
 
                 {/* Bubble */}
-                <div className={`
+                <div
+                  className={`
                   relative shadow-sm overflow-hidden
                   max-w-[72%] sm:max-w-[58%]
-                  ${isMine
-                    ? "bg-white text-gray-800 rounded-2xl rounded-br-sm"
-                    : "bg-[#20c7ff] text-white rounded-2xl rounded-bl-sm"
+                  ${
+                    isMine
+                      ? "bg-white text-gray-800 rounded-2xl rounded-br-sm"
+                      : "bg-[#20c7ff] text-white rounded-2xl rounded-bl-sm"
                   }
                   ${msg.imageUrl ? "p-1" : "px-3 py-2"}
-                `}>
+                `}
+                >
                   {msg.imageUrl && (
                     <img
                       src={msg.imageUrl}
@@ -263,17 +316,23 @@ function MessageArea() {
                   )}
 
                   {msg.message && (
-                    <p className={`text-sm leading-relaxed break-words whitespace-pre-wrap
-                      ${msg.imageUrl ? "px-2 pb-1 pt-1" : "pr-14"}`}>
+                    <p
+                      className={`text-sm leading-relaxed break-words whitespace-pre-wrap
+                      ${msg.imageUrl ? "px-2 pb-1 pt-1" : "pr-14"}`}
+                    >
                       {msg.message}
                     </p>
                   )}
 
                   {/* Time + ticks pinned bottom-right */}
-                  <div className={`flex items-center gap-0.5 justify-end
-                    ${msg.imageUrl ? "px-2 pb-1 mt-1" : "absolute bottom-1.5 right-2"}`}>
-                    <span className={`text-[10px] leading-none
-                      ${isMine ? "text-gray-400" : "text-white/70"}`}>
+                  <div
+                    className={`flex items-center gap-0.5 justify-end
+                    ${msg.imageUrl ? "px-2 pb-1 mt-1" : "absolute bottom-1.5 right-2"}`}
+                  >
+                    <span
+                      className={`text-[10px] leading-none
+                      ${isMine ? "text-gray-400" : "text-white/70"}`}
+                    >
                       {formatMsgTime(msg.createdAt)}
                     </span>
                     <StatusIcon status={msg.status} isMine={isMine} />
@@ -302,7 +361,11 @@ function MessageArea() {
       {imagePreview && (
         <div className="px-4 py-2 bg-white border-t border-gray-100 flex items-center gap-3 shrink-0">
           <div className="relative">
-            <img src={imagePreview} alt="preview" className="h-16 w-16 object-cover rounded-xl border border-gray-200" />
+            <img
+              src={imagePreview}
+              alt="preview"
+              className="h-16 w-16 object-cover rounded-xl border border-gray-200"
+            />
             <button
               onClick={clearImage}
               className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-gray-700 text-white rounded-full flex items-center justify-center"
@@ -321,7 +384,13 @@ function MessageArea() {
         style={{ paddingBottom: "max(8px, env(safe-area-inset-bottom))" }}
       >
         {/* Hidden file input */}
-        <input ref={fileRef} type="file" accept="image/*" hidden onChange={handleImagePick} />
+        <input
+          ref={fileRef}
+          type="file"
+          accept="image/*"
+          hidden
+          onChange={handleImagePick}
+        />
 
         {/* Photo button */}
         <button
@@ -340,7 +409,10 @@ function MessageArea() {
             ref={inputRef}
             rows={1}
             value={text}
-            onChange={(e) => { setText(e.target.value); onTyping(); }}
+            onChange={(e) => {
+              setText(e.target.value);
+              onTyping();
+            }}
             onKeyDown={handleKeyDown}
             placeholder="Type a message"
             style={{ fontSize: "16px" }}

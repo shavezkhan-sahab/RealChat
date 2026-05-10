@@ -25,7 +25,8 @@ function Profile() {
       setBackendImage(file);
     }
   };
-
+  const url =
+    "https://realchat-1-8fm2.onrender.com/" || "http://localhost:8000/";
   const handleSave = async (e) => {
     e.preventDefault();
     if (!backendImage) return;
@@ -35,11 +36,9 @@ function Profile() {
       const formData = new FormData();
       formData.append("image", backendImage);
       // Do NOT set Content-Type manually — axios must set it with the correct boundary
-      const result = await axios.put(
-        "http://localhost:8000/api/user/profile",
-        formData,
-        { withCredentials: true }
-      );
+      const result = await axios.put(`${url}api/user/profile`, formData, {
+        withCredentials: true,
+      });
       dispatch(setUserData(result.data));
       setSuccess(true);
       setBackendImage(null);
@@ -51,9 +50,10 @@ function Profile() {
   };
 
   return (
-    <div className="w-full bg-[#f0f4f8] flex flex-col items-center overflow-y-auto"
-      style={{ minHeight: "calc(var(--vh, 1dvh) * 100)" }}>
-
+    <div
+      className="w-full bg-[#f0f4f8] flex flex-col items-center overflow-y-auto"
+      style={{ minHeight: "calc(var(--vh, 1dvh) * 100)" }}
+    >
       {/* Header */}
       <div className="w-full bg-[#20c7ff] px-5 pt-5 pb-16 rounded-b-[40px] shadow-lg flex items-center gap-3">
         <button
@@ -71,7 +71,11 @@ function Profile() {
           className="w-[110px] h-[110px] rounded-full overflow-hidden border-4 border-white shadow-xl cursor-pointer"
           onClick={() => imageRef.current.click()}
         >
-          <img src={frontendImage} alt="avatar" className="w-full h-full object-cover" />
+          <img
+            src={frontendImage}
+            alt="avatar"
+            className="w-full h-full object-cover"
+          />
         </div>
         <div
           className="absolute bottom-1 right-1 w-8 h-8 bg-[#20c7ff] rounded-full flex items-center justify-center shadow cursor-pointer border-2 border-white"
@@ -79,7 +83,13 @@ function Profile() {
         >
           <FaCamera className="w-3.5 h-3.5 text-white" />
         </div>
-        <input ref={imageRef} type="file" accept="image/*" hidden onChange={handleImage} />
+        <input
+          ref={imageRef}
+          type="file"
+          accept="image/*"
+          hidden
+          onChange={handleImage}
+        />
       </div>
 
       {/* Info card */}
@@ -91,12 +101,16 @@ function Profile() {
         <div className="bg-white rounded-2xl shadow-sm px-5 py-4 flex flex-col gap-3">
           <div>
             <p className="text-xs text-gray-400 mb-1">Username</p>
-            <p className="text-sm font-semibold text-gray-700">{userData?.userName}</p>
+            <p className="text-sm font-semibold text-gray-700">
+              {userData?.userName}
+            </p>
           </div>
           <div className="h-px bg-gray-100" />
           <div>
             <p className="text-xs text-gray-400 mb-1">Email</p>
-            <p className="text-sm font-semibold text-gray-700">{userData?.email}</p>
+            <p className="text-sm font-semibold text-gray-700">
+              {userData?.email}
+            </p>
           </div>
         </div>
 
@@ -117,7 +131,9 @@ function Profile() {
               <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
               Saving...
             </span>
-          ) : "Save Photo"}
+          ) : (
+            "Save Photo"
+          )}
         </button>
       </form>
     </div>

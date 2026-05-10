@@ -13,14 +13,17 @@ const formatTime = (iso) => {
   if (!iso) return "";
   const date = new Date(iso);
   const diffDays = Math.floor((new Date() - date) / 86400000);
-  if (diffDays === 0) return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  if (diffDays === 0)
+    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   if (diffDays < 7) return date.toLocaleDateString([], { weekday: "short" });
   return date.toLocaleDateString([], { day: "2-digit", month: "2-digit" });
 };
 
 const Ticks = ({ status }) => {
-  if (status === "seen") return <span className="text-[10px] text-[#20c7ff]">✓✓</span>;
-  if (status === "delivered") return <span className="text-[10px] text-gray-400">✓✓</span>;
+  if (status === "seen")
+    return <span className="text-[10px] text-[#20c7ff]">✓✓</span>;
+  if (status === "delivered")
+    return <span className="text-[10px] text-gray-400">✓✓</span>;
   return <span className="text-[10px] text-gray-400">✓</span>;
 };
 
@@ -62,11 +65,13 @@ function SideBar() {
   });
 
   // Online users for the avatar strip in the header
-  const onlineOthers = (otherUsers || []).filter((u) => onlineUsers.includes(u._id));
+  const onlineOthers = (otherUsers || []).filter((u) =>
+    onlineUsers.includes(u._id),
+  );
 
   // Search filter
   const filtered = allUsers.filter((e) =>
-    e.user?.userName?.toLowerCase().includes(searchQuery.toLowerCase())
+    e.user?.userName?.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const handleSelect = (entry) => {
@@ -74,22 +79,29 @@ function SideBar() {
     if (entry.unreadCount > 0) dispatch(clearUnread(entry.user._id));
   };
 
+  const url =
+    "https://realchat-1-8fm2.onrender.com/" || "http://localhost:8000/";
+
   const handleLogout = async () => {
     try {
-      await axios.get("http://localhost:8000/api/auth/logout", { withCredentials: true });
+      await axios.get(`${url}api/auth/logout`, {
+        withCredentials: true,
+      });
       dispatch(setUserData(null));
-    } catch (e) { console.error(e); }
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   return (
     <div className="w-full h-full flex flex-col bg-[#f0f4f8]">
-
       {/* ══ Curved blue header ══════════════════════════════════════════════ */}
       <div className="bg-[#20c7ff] px-5 pt-5 pb-10 rounded-b-[40px] shadow-lg shrink-0">
-
         {/* Row 1: logo + logout */}
         <div className="flex justify-between items-center mb-3">
-          <h1 className="text-white font-bold text-2xl tracking-wide">chatly</h1>
+          <h1 className="text-white font-bold text-2xl tracking-wide">
+            chatly
+          </h1>
           <button
             onClick={handleLogout}
             className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center
@@ -110,7 +122,11 @@ function SideBar() {
                        shadow-md cursor-pointer shrink-0"
             onClick={() => navigate("/profile")}
           >
-            <img src={userData?.image || dp} alt="me" className="w-full h-full object-cover" />
+            <img
+              src={userData?.image || dp}
+              alt="me"
+              className="w-full h-full object-cover"
+            />
           </div>
         </div>
 
@@ -143,96 +159,131 @@ function SideBar() {
               />
               <RxCross2
                 className="w-[15px] h-[15px] text-gray-400 cursor-pointer shrink-0"
-                onClick={() => { setSearchOpen(false); setSearchQuery(""); }}
+                onClick={() => {
+                  setSearchOpen(false);
+                  setSearchQuery("");
+                }}
               />
             </form>
           )}
 
           {/* Online user avatars — only when search is closed */}
-          {!searchOpen && onlineOthers.slice(0, 4).map((u) => (
-            <div
-              key={u._id}
-              className="relative shrink-0 cursor-pointer"
-              onClick={() => {
-                const entry = allUsers.find((e) => e.user._id === u._id);
-                if (entry) handleSelect(entry);
-                else dispatch(setSelectedUser(u));
-              }}
-              title={u.userName}
-            >
-              <div className="w-[42px] h-[42px] rounded-full overflow-hidden
-                              border-[2px] border-white shadow">
-                <img src={u.image || dp} alt={u.userName} className="w-full h-full object-cover" />
+          {!searchOpen &&
+            onlineOthers.slice(0, 4).map((u) => (
+              <div
+                key={u._id}
+                className="relative shrink-0 cursor-pointer"
+                onClick={() => {
+                  const entry = allUsers.find((e) => e.user._id === u._id);
+                  if (entry) handleSelect(entry);
+                  else dispatch(setSelectedUser(u));
+                }}
+                title={u.userName}
+              >
+                <div
+                  className="w-[42px] h-[42px] rounded-full overflow-hidden
+                              border-[2px] border-white shadow"
+                >
+                  <img
+                    src={u.image || dp}
+                    alt={u.userName}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <span
+                  className="absolute bottom-0 right-0 w-[11px] h-[11px] bg-green-400
+                               border-2 border-white rounded-full"
+                />
               </div>
-              <span className="absolute bottom-0 right-0 w-[11px] h-[11px] bg-green-400
-                               border-2 border-white rounded-full" />
-            </div>
-          ))}
+            ))}
         </div>
       </div>
 
       {/* ══ User / chat list ════════════════════════════════════════════════ */}
       <div className="flex-1 overflow-y-auto py-3 px-3 flex flex-col gap-2">
-        {filtered.length > 0 ? filtered.map((entry) => {
-          const { user, lastMessage, lastMessageAt, lastStatus, lastSender, unreadCount } = entry;
-          const isOnline = onlineUsers.includes(user._id);
-          const isSelected = selectedUser?._id === user._id;
-          const isMine = lastSender === userData?._id;
+        {filtered.length > 0 ? (
+          filtered.map((entry) => {
+            const {
+              user,
+              lastMessage,
+              lastMessageAt,
+              lastStatus,
+              lastSender,
+              unreadCount,
+            } = entry;
+            const isOnline = onlineUsers.includes(user._id);
+            const isSelected = selectedUser?._id === user._id;
+            const isMine = lastSender === userData?._id;
 
-          return (
-            <div
-              key={user._id}
-              onClick={() => handleSelect(entry)}
-              className={`flex items-center gap-3 px-4 py-3 rounded-full cursor-pointer
+            return (
+              <div
+                key={user._id}
+                onClick={() => handleSelect(entry)}
+                className={`flex items-center gap-3 px-4 py-3 rounded-full cursor-pointer
                           transition-all select-none
-                          ${isSelected
-                  ? "bg-[#20c7ff]/20 shadow-inner"
-                  : "bg-white hover:bg-[#20c7ff]/10 shadow-sm"}`}
-            >
-              {/* Avatar + online dot */}
-              <div className="relative shrink-0">
-                <div className="w-[46px] h-[46px] rounded-full overflow-hidden">
-                  <img src={user.image || dp} alt={user.userName}
-                    className="w-full h-full object-cover" />
-                </div>
-                {isOnline && (
-                  <span className="absolute bottom-0 right-0 w-[12px] h-[12px] bg-green-400
-                                   border-2 border-white rounded-full" />
-                )}
-              </div>
-
-              {/* Name + last message preview */}
-              <div className="flex-1 min-w-0">
-                <div className="flex justify-between items-baseline">
-                  <span className="text-sm font-semibold text-gray-800 truncate">
-                    {user.userName}
-                  </span>
-                  {lastMessageAt && (
-                    <span className="text-[10px] text-gray-400 shrink-0 ml-1">
-                      {formatTime(lastMessageAt)}
-                    </span>
-                  )}
-                </div>
-
-                <div className="flex justify-between items-center mt-0.5">
-                  <div className="flex items-center gap-1 min-w-0">
-                    {isMine && lastStatus && <Ticks status={lastStatus} />}
-                    <span className="text-xs text-gray-400 truncate">
-                      {lastMessage || (lastStatus ? "📷 Photo" : isOnline ? "Online" : "Tap to chat")}
-                    </span>
+                          ${
+                            isSelected
+                              ? "bg-[#20c7ff]/20 shadow-inner"
+                              : "bg-white hover:bg-[#20c7ff]/10 shadow-sm"
+                          }`}
+              >
+                {/* Avatar + online dot */}
+                <div className="relative shrink-0">
+                  <div className="w-[46px] h-[46px] rounded-full overflow-hidden">
+                    <img
+                      src={user.image || dp}
+                      alt={user.userName}
+                      className="w-full h-full object-cover"
+                    />
                   </div>
-                  {unreadCount > 0 && (
-                    <span className="ml-2 shrink-0 min-w-[20px] h-[20px] px-1 bg-[#20c7ff]
-                                     text-white text-[10px] font-bold rounded-full flex
-                                     items-center justify-center">
-                      {unreadCount > 99 ? "99+" : unreadCount}
-                    </span>
+                  {isOnline && (
+                    <span
+                      className="absolute bottom-0 right-0 w-[12px] h-[12px] bg-green-400
+                                   border-2 border-white rounded-full"
+                    />
                   )}
                 </div>
+
+                {/* Name + last message preview */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex justify-between items-baseline">
+                    <span className="text-sm font-semibold text-gray-800 truncate">
+                      {user.userName}
+                    </span>
+                    {lastMessageAt && (
+                      <span className="text-[10px] text-gray-400 shrink-0 ml-1">
+                        {formatTime(lastMessageAt)}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="flex justify-between items-center mt-0.5">
+                    <div className="flex items-center gap-1 min-w-0">
+                      {isMine && lastStatus && <Ticks status={lastStatus} />}
+                      <span className="text-xs text-gray-400 truncate">
+                        {lastMessage ||
+                          (lastStatus
+                            ? "📷 Photo"
+                            : isOnline
+                              ? "Online"
+                              : "Tap to chat")}
+                      </span>
+                    </div>
+                    {unreadCount > 0 && (
+                      <span
+                        className="ml-2 shrink-0 min-w-[20px] h-[20px] px-1 bg-[#20c7ff]
+                                     text-white text-[10px] font-bold rounded-full flex
+                                     items-center justify-center"
+                      >
+                        {unreadCount > 99 ? "99+" : unreadCount}
+                      </span>
+                    )}
+                  </div>
+                </div>
               </div>
-            </div>
-          );
-        }) : (
+            );
+          })
+        ) : (
           <div className="flex flex-col items-center justify-center mt-16 gap-2">
             <p className="text-gray-400 text-sm">
               {searchQuery ? "No users found" : "No other users yet"}

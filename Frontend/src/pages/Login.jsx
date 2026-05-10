@@ -14,16 +14,17 @@ function Login() {
   const [show, setShow] = useState(false);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
-
+  const url =
+    "https://realchat-1-8fm2.onrender.com/" || "http://localhost:8000/";
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
     setErr("");
     try {
       const result = await axios.post(
-        "http://localhost:8000/api/auth/login",
+        `${url}api/auth/login`,
         { email, password },
-        { withCredentials: true }
+        { withCredentials: true },
       );
       dispatch(setUserData(result.data));
     } catch (error) {
@@ -34,18 +35,24 @@ function Login() {
   };
 
   return (
-    <div className="w-full bg-[#f0f4f8] flex items-center justify-center px-4"
-      style={{ minHeight: "calc(var(--vh, 1dvh) * 100)" }}>
+    <div
+      className="w-full bg-[#f0f4f8] flex items-center justify-center px-4"
+      style={{ minHeight: "calc(var(--vh, 1dvh) * 100)" }}
+    >
       <div className="w-full max-w-[420px] bg-white rounded-3xl shadow-xl overflow-hidden">
-
         {/* Blue curved header */}
         <div className="bg-[#20c7ff] px-8 pt-10 pb-14 rounded-b-[50%] flex flex-col items-center gap-1 shadow-md">
-          <h1 className="text-white font-bold text-3xl tracking-wide">chatly</h1>
+          <h1 className="text-white font-bold text-3xl tracking-wide">
+            chatly
+          </h1>
           <p className="text-white/80 text-sm">Login to your account</p>
         </div>
 
         {/* Form */}
-        <form className="px-8 pt-8 pb-8 flex flex-col gap-4 -mt-4" onSubmit={handleLogin}>
+        <form
+          className="px-8 pt-8 pb-8 flex flex-col gap-4 -mt-4"
+          onSubmit={handleLogin}
+        >
           <input
             type="email"
             placeholder="Email address"
@@ -71,12 +78,18 @@ function Login() {
               onClick={() => setShow((p) => !p)}
               className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#20c7ff] transition"
             >
-              {show ? <LuEyeOff className="w-5 h-5" /> : <LuEye className="w-5 h-5" />}
+              {show ? (
+                <LuEyeOff className="w-5 h-5" />
+              ) : (
+                <LuEye className="w-5 h-5" />
+              )}
             </button>
           </div>
 
           {err && (
-            <p className="text-red-500 text-sm text-center bg-red-50 py-2 rounded-xl">{err}</p>
+            <p className="text-red-500 text-sm text-center bg-red-50 py-2 rounded-xl">
+              {err}
+            </p>
           )}
 
           <button
@@ -90,7 +103,9 @@ function Login() {
                 <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 Logging in...
               </span>
-            ) : "Login"}
+            ) : (
+              "Login"
+            )}
           </button>
 
           <p className="text-center text-sm text-gray-500 mt-1">

@@ -5,8 +5,9 @@ import { BrowserRouter } from "react-router-dom";
 import { Provider } from "react-redux";
 import { store } from "./redux/store.js";
 
-export const serverUrl = "http://localhost:8000";
-
+// export const serverUrl = "http://localhost:8000";
+const serverUrl =
+  "https://realchat-1-8fm2.onrender.com/" || "http://localhost:8000/";
 // ── Cross-browser mobile viewport height fix ──────────────────────────────
 // Chrome on Android and Safari on iOS both have issues with 100vh including
 // the browser toolbar. We track the real visible height via visualViewport
@@ -26,5 +27,5 @@ createRoot(document.getElementById("root")).render(
     <Provider store={store}>
       <App />
     </Provider>
-  </BrowserRouter>
+  </BrowserRouter>,
 );

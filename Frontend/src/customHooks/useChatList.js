@@ -11,13 +11,15 @@ import { setChatList } from "../redux/messageSlice.js";
 const useChatList = () => {
   const dispatch = useDispatch();
   const { userData } = useSelector((state) => state.user);
+  const url =
+    "https://realchat-1-8fm2.onrender.com/" || "http://localhost:8000/";
 
   useEffect(() => {
     if (!userData?._id) return;
 
     const fetch = async () => {
       try {
-        const res = await axios.get("http://localhost:8000/api/messages/chats", {
+        const res = await axios.get(`${url}api/messages/chats`, {
           withCredentials: true,
         });
         dispatch(setChatList(res.data));
