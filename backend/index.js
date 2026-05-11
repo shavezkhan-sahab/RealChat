@@ -18,7 +18,15 @@ const port = process.env.PORT || 8000;
 // ── Express app ────────────────────────────────────────────────────────────
 const app = express();
 
-app.use(cors());
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173", // local Vite
+      "https://realchat-2.onrender.com/", // Render frontend
+    ],
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(cookieParser());
 app.use("/uploads", express.static("public/uploads"));
